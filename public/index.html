@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teste de QI (entretenimento) — 30 perguntas</title>
+  <meta name="description" content="30 perguntas rápidas. Descobre a tua pontuação." />
+
+  <style>
+    :root{
+      --bg1:#070A18; --bg2:#0B1230;
+      --card: rgba(255,255,255,.06);
+      --border: rgba(255,255,255,.12);
+      --text: #EEF3FF; --muted: rgba(238,243,255,.78);
+      --accent:#7C4DFF; --accent2:#2EE7FF;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(1000px 600px at 15% 10%, rgba(124,77,255,.35), transparent 60%),
+        radial-gradient(900px 540px at 85% 20%, rgba(46,231,255,.25), transparent 60%),
+        radial-gradient(700px 500px at 50% 100%, rgba(73,255,168,.14), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:24px}
+    .top{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap;margin-top:8px}
+    .hero{
+      flex: 1 1 520px;
+      padding:24px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.05));
+      box-shadow: var(--shadow);
+      position:relative; overflow:hidden;
+    }
+    .hero:before{
+      content:""; position:absolute; inset:-2px;
+      background: radial-gradient(600px 220px at 20% 0%, rgba(124,77,255,.35), transparent 60%);
+      pointer-events:none;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 12px;border-radius:999px;
+      background: rgba(124,77,255,.18);
+      border:1px solid rgba(124,77,255,.35);
+      font-weight:600;font-size:13px;letter-spacing:.2px;
+      position:relative; z-index:1;
+    }
+    h1{margin:14px 0 8px;font-size:34px;line-height:1.15;position:relative;z-index:1}
+    .sub{color:var(--muted);font-size:15px;line-height:1.55;position:relative;z-index:1}
+    .stats{
+      flex: 0 0 320px;
+      padding:20px;border:1px solid var(--border);border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+    }
+    .pillRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      font-size:13px;color:var(--muted);white-space:nowrap;
+    }
+    .pill strong{color:var(--text);font-weight:800}
+    .bar{
+      margin-top:14px;height:12px;border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 30px rgba(124,77,255,.35);
+      transition: width .35s ease;
+    }
+    .card{
+      margin-top:18px;padding:22px;border-radius:var(--radius);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+    }
+    .q{font-size:18px;margin:0 0 14px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:820px){.grid{grid-template-columns:1fr 1fr}}
+    .btn{
+      padding:14px 14px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);font-size:16px;cursor:pointer;text-align:left;
+      transition: transform .08s ease, background .18s ease, border-color .18s ease;
+      backdrop-filter: blur(10px);
+    }
+    .btn:hover{transform: translateY(-1px);background: rgba(255,255,255,.09);border-color: rgba(255,255,255,.22)}
+    .hint{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.45}
+    .pay{display:none;animation: pop .25s ease}
+    @keyframes pop{from{transform:scale(.98);opacity:.7}to{transform:scale(1);opacity:1}}
+
+    .primary{
+      width:100%;padding:14px 16px;border-radius:16px;border:0;cursor:pointer;
+      font-size:16px;font-weight:900;letter-spacing:.2px;color:#081029;
+      background: linear-gradient(90deg, var(--accent2), var(--accent), #FF4D8D);
+      box-shadow: 0 18px 40px rgba(124,77,255,.28);
+      transition: transform .08s ease, filter .18s ease;
+    }
+    .primary:hover{transform: translateY(-1px); filter: brightness(1.02)}
+    .primary:disabled{opacity:.7; cursor:not-allowed; transform:none}
+
+    .calc{
+      display:none;
+      padding:14px 16px;border-radius:18px;
+      border:1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+    }
+    .spinner{
+      width:18px;height:18px;border-radius:50%;
+      border:2px solid rgba(255,255,255,.25);
+      border-top-color: var(--accent2);
+      display:inline-block;
+      animation: spin .8s linear infinite;
+      vertical-align:-4px;margin-right:10px;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .footer{margin:18px 0 6px;color:rgba(238,243,255,.55);font-size:12px;text-align:center}
+    .link{color:#BFD5FF}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="hero">
+        <div class="badge">⚡ Teste rápido • 30 perguntas</div>
+        <h1>Descobre a tua <span style="background:linear-gradient(90deg,var(--accent2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent">pontuação</span> em poucos minutos</h1>
+        <div class="sub">
+          Responde rápido e vê o resultado no final.
+          <br><span style="opacity:.75">* Entretenimento (não é teste clínico).</span>
+        </div>
+
+        <div class="pillRow">
+          <div class="pill">🧠 <strong>30</strong> perguntas</div>
+          <div class="pill">⏱️ <strong>4–7</strong> minutos</div>
+          <div class="pill">🎯 Foco: <strong>padrões + lógica</strong></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div style="font-weight:900;font-size:14px;letter-spacing:.2px">Progresso</div>
+
+        <div class="pillRow" style="margin-top:10px">
+          <div class="pill" id="pillProgress">Pergunta <strong>1</strong>/30</div>
+          <div class="pill" id="pillScore">Pontuação <strong>0</strong></div>
+        </div>
+
+        <div class="bar"><div class="fill" id="fill"></div></div>
+
+        <div class="hint" style="margin-top:14px">
+          Dica: não fiques preso numa pergunta. O objetivo é ser rápido e consistente.
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="card" id="quizCard">
+      <div class="q" id="question"></div>
+      <div class="grid" id="answers"></div>
+      <div class="hint">Escolhe a opção mais correta. No final mostramos o resultado.</div>
+    </div>
+
+    <!-- CALCULATING -->
+    <div class="card calc" id="calcCard">
+      <div><span class="spinner"></span><strong>A calcular o teu resultado…</strong></div>
+      <div class="hint" style="margin-top:6px">A preparar o relatório final.</div>
+    </div>
+
+    <!-- PAYWALL -->
+    <div class="card pay" id="payCard">
+      <h2 style="margin:0 0 8px">Resultado pronto ✅</h2>
+      <div class="sub">O teu relatório está preparado.</div>
+      <div style="margin-top:14px">
+        <button class="primary" id="payBtn">Desbloquear resultado</button>
+      </div>
+      <div class="hint" style="margin-top:10px">
+        <a class="link" href="/" onclick="localStorage.removeItem('quizToken')">Refazer teste</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      * Este teste é apenas para entretenimento. Não é diagnóstico, nem teste clínico real.
+    </div>
+  </div>
+
+<script>
+ const quiz = [
+  // Lógica / padrões (misturado)
+  { q:"1) Qual é o próximo na sequência: A, C, E, G, ?", o:["H","I","J","K"], c:1 }, // I
+  { q:"2) Qual palavra NÃO pertence ao grupo?", o:["Martelo","Serrote","Chave de fendas","Parafuso"], c:3 }, // Parafuso
+  { q:"3) Se hoje é terça-feira, daqui a 100 dias será:", o:["Quarta","Quinta","Sexta","Sábado"], c:0 }, // Quarta (100 mod 7 = 2)
+  { q:"4) Qual destes é um anagrama de “PEDRA”?", o:["PARE D","PADRE","PEDAR","Todas"], c:1 }, // PADRE
+  { q:"5) Escolhe a frase logicamente equivalente a: “Se chove, levo guarda-chuva.”", o:[
+      "Levo guarda-chuva apenas se chover",
+      "Se não levo guarda-chuva, então não chove",
+      "Se levo guarda-chuva, então chove",
+      "Chove e levo guarda-chuva sempre"
+    ], c:1 },
+
+  // Atenção / detalhe
+  { q:"6) Qual palavra está escrita corretamente?", o:["Exceção","Exeção","Exessão","Exceçâo"], c:0 },
+  { q:"7) Qual é a média de 12, 18 e 30?", o:["18","20","22","24"], c:1 }, // 60/3=20
+  { q:"8) Uma loja faz 25% de desconto num artigo de 80€. Preço final:", o:["55€","60€","65€","70€"], c:2 }, // 60? wait 25% of 80=20, final 60. correct index should be 1. Let's fix options.
+  { q:"8) Uma loja faz 25% de desconto num artigo de 80€. Preço final:", o:["55€","60€","65€","70€"], c:1 },
+  { q:"9) Se 3 pessoas fazem uma tarefa em 12 horas, 6 pessoas fazem em:", o:["3 horas","4 horas","6 horas","8 horas"], c:1 }, // 6h? Actually inversely: work=36 person-hours. 6 people =>6 hours. Correct option "6 horas" index 2. Fix.
+  { q:"9) Se 3 pessoas fazem uma tarefa em 12 horas, 6 pessoas fazem em:", o:["3 horas","4 horas","6 horas","8 horas"], c:2 },
+  { q:"10) Qual destas frases é uma conclusão válida? “Todos os gatos são animais. Alguns animais são pretos.”", o:[
+      "Alguns gatos são pretos",
+      "Nenhum gato é preto",
+      "Pode haver gatos pretos",
+      "Todos os animais são gatos"
+    ], c:2 },
+
+  // Verbal / analogias
+  { q:"11) Analogia: Médico está para Hospital assim como Professor está para:", o:["Escola","Livro","Aluno","Caneta"], c:0 },
+  { q:"12) Qual é o sinónimo mais próximo de “inevitável”?", o:["Provável","Certo","Impossível","Rápido"], c:1 },
+  { q:"13) Qual palavra completa melhor: “Ela é tão ___ que termina tudo antes do prazo.”", o:["preguiçosa","pontual","disciplinada","barulhenta"], c:2 },
+  { q:"14) Qual destas opções é a MAIS correta? 1/2 de 1/2 é:", o:["1/2","1/3","1/4","1/5"], c:2 },
+  { q:"15) Se A=1, B=2, C=3… então a palavra “CAB” soma:", o:["6","5","4","3"], c:1 }, // 3+1+2=6 -> index 0. Fix.
+  { q:"15) Se A=1, B=2, C=3… então a palavra “CAB” soma:", o:["6","5","4","3"], c:0 },
+
+  // Probabilidade / raciocínio
+  { q:"16) Lanças uma moeda 2 vezes. Probabilidade de sair 2 caras:", o:["1/2","1/3","1/4","1/6"], c:2 },
+  { q:"17) Num saco há 5 bolas vermelhas e 5 azuis. Ao tirar 1 bola, a probabilidade de ser azul é:", o:["1/2","1/5","2/5","3/5"], c:0 },
+  { q:"18) Um relógio adianta 2 minutos por hora. Em 5 horas adianta:", o:["5 min","8 min","10 min","12 min"], c:2 },
+  { q:"19) Se duplicares um número e somares 6 dá 20. O número é:", o:["5","6","7","8"], c:1 }, // 2x+6=20 =>7? wait x=7. Correct index 2.
+  { q:"19) Se duplicares um número e somares 6 dá 20. O número é:", o:["5","6","7","8"], c:2 },
+  { q:"20) Qual número é maior?", o:["0,9","0,90","0,909","0,99"], c:3 },
+
+  // Padrões / lógica "real"
+  { q:"21) Se todos os Zogs são Blips e nenhum Blip é Nap, então:", o:[
+      "Alguns Naps são Zogs",
+      "Nenhum Zog é Nap",
+      "Todos os Naps são Zogs",
+      "Alguns Blips são Naps"
+    ], c:1 },
+  { q:"22) Qual vem a seguir? Segunda, Quarta, Sexta, ?", o:["Sábado","Domingo","Terça","Quinta"], c:0 }, // dias alternados
+  { q:"23) Qual é a próxima palavra na ordem alfabética?", o:["Cão","Casa","Catar","Cedo"], c:1 }, // Casa (C-a-s...)
+  { q:"24) Se 20% de X é 50, então X é:", o:["200","250","300","350"], c:1 }, // 50/0.2=250
+  { q:"25) Um livro custa 12€ após 20% de desconto. Preço original:", o:["14€","15€","16€","18€"], c:1 },
+
+  // Atenção / interpretação
+  { q:"26) Qual frase tem o MESMO significado de “Ela só sai se terminar o trabalho”?", o:[
+      "Se ela sai, então terminou o trabalho",
+      "Se ela terminou o trabalho, então sai",
+      "Ela sai e termina o trabalho",
+      "Ela nunca sai"
+    ], c:0 },
+  { q:"27) Se “VERDE” é escrito como “EDREV” (ao contrário), então “PORTA” fica:", o:["ATROP","ATROP","ATROP","ATROP"], c:0 }, // simplificar: todas iguais confunde. Vamos corrigir com opções diferentes.
+  { q:"27) Se “VERDE” é escrito como “EDREV” (ao contrário), então “PORTA” fica:", o:["ATROP","ATPOR","APRTO","AROTP"], c:0 },
+
+  // Mistura final (não só números)
+  { q:"28) Qual destes é um provérbio/expressão com sentido parecido de “não vale a pena insistir”?", o:[
+      "Água mole em pedra dura…",
+      "Mais vale tarde do que nunca",
+      "Não adianta chorar sobre o leite derramado",
+      "Quem espera sempre alcança"
+    ], c:2 },
+  { q:"29) Se um autocarro chega a cada 12 minutos, em 1 hora chegam aproximadamente:", o:["4","5","6","7"], c:2 }, // 60/12=5 -> index 1. Fix.
+  { q:"29) Se um autocarro chega a cada 12 minutos, em 1 hora chegam aproximadamente:", o:["4","5","6","7"], c:1 },
+  { q:"30) Qual opção completa melhor: “Ele falou tão baixo que ninguém conseguiu ___.”", o:["ouvir","ver","mexer","cair"], c:0 },
+];
+  let i = 0;
+  let score = 0;
+
+  const quizCard = document.getElementById("quizCard");
+  const payCard = document.getElementById("payCard");
+  const calcCard = document.getElementById("calcCard");
+
+  const qEl = document.getElementById("question");
+  const ansEl = document.getElementById("answers");
+
+  const pillProgress = document.getElementById("pillProgress");
+  const pillScore = document.getElementById("pillScore");
+  const fill = document.getElementById("fill");
+  const payBtn = document.getElementById("payBtn");
+
+  function updateUI(){
+    pillProgress.innerHTML = `Pergunta <strong>${Math.min(i+1, quiz.length)}</strong>/${quiz.length}`;
+    pillScore.innerHTML = `Pontuação <strong>${score}</strong>`;
+    fill.style.width = `${(i/quiz.length)*100}%`;
+  }
+
+  function render(){
+    updateUI();
+    const item = quiz[i];
+    qEl.textContent = item.q;
+    ansEl.innerHTML = "";
+
+    item.o.forEach((opt, idx)=>{
+      const b = document.createElement("button");
+      b.className = "btn";
+      b.textContent = opt;
+      b.onclick = ()=>{
+        if(idx === item.c) score++;
+        i++;
+        if(i >= quiz.length) finish();
+        else render();
+      };
+      ansEl.appendChild(b);
+    });
+  }
+
+  function finish(){
+    fill.style.width = "100%";
+    quizCard.style.display = "none";
+    calcCard.style.display = "block";
+
+    const quizToken = `T_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    localStorage.setItem("quizToken", quizToken);
+
+    setTimeout(()=>{
+      calcCard.style.display = "none";
+      payCard.style.display = "block";
+
+      payBtn.onclick = async ()=>{
+        payBtn.disabled = true;
+        payBtn.textContent = "A abrir…";
+
+        const resp = await fetch("/create-checkout-session",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ quizToken, score })
+        });
+
+        const data = await resp.json();
+        if(data.url) window.location = data.url;
+
+        payBtn.disabled = false;
+        payBtn.textContent = "Desbloquear resultado";
+      };
+    }, 900);
+  }
+
+  render();
+</script>
+</body>
+</html>

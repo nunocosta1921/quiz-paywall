@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resultado desbloqueado</title>
+  <style>
+    :root{--bg:#0b1220;--card:#111b33;--border:#21325a;--muted:rgba(231,238,252,.82);--accent:#2e5bff}
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#e7eefc}
+    .wrap{max-width:860px;margin:0 auto;padding:24px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px;margin:14px 0}
+    .muted{color:var(--muted)}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #2b4074;background:#0f1a35;font-size:13px}
+    .big{font-size:44px;font-weight:800;margin:10px 0}
+    a{color:#9fc3ff}
+    ul{margin:10px 0 0 18px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1 style="margin:0 0 6px">A validar pagamento…</h1>
+    <div class="muted" id="status">Só um momento.</div>
+  </div>
+
+  <div class="card" id="result" style="display:none">
+    <span class="pill" id="pill"></span>
+    <div class="big" id="iq"></div>
+    <div class="muted" id="desc"></div>
+    <ul id="tips"></ul>
+    <div class="muted" style="margin-top:12px">
+      <span class="small">* Estimativa para entretenimento. Não é diagnóstico nem teste clínico.</span>
+      <br><a href="/" onclick="localStorage.removeItem('quizToken')">Refazer teste</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const session_id = params.get('session_id');
+  const token = params.get('token') || localStorage.getItem('quizToken');
+
+  const statusEl = document.getElementById('status');
+  const resultCard = document.getElementById('result');
+  const pillEl = document.getElementById('pill');
+  const iqEl = document.getElementById('iq');
+  const descEl = document.getElementById('desc');
+  const tipsEl = document.getElementById('tips');
+
+  function estimateIQ(score){
+    // score 0..20 -> IQ estimado (entretenimento)
+    // mapeamento simples e “redondo”
+    if(score <= 4)  return {iq: 80,  label:"Muito baixo (estimativa)", desc:"Poucas respostas corretas. Talvez estavas com pressa/sono.", tips:["Refaz com calma", "Dorme bem antes de tentar", "Treina lógica básica 10 min/dia"]};
+    if(score <= 7)  return {iq: 90,  label:"Baixo (estimativa)", desc:"Abaixo da média neste quiz.", tips:["Treina matemática mental", "Faz puzzles simples", "Lê com atenção às perguntas"]};
+    if(score <= 10) return {iq: 100, label:"Média (estimativa)", desc:"Resultado na média.", tips:["Mantém consistência", "Treina padrões e sequências", "Faz 2 quizzes/semana"]};
+    if(score <= 13) return {iq: 110, label:"Acima da média (estimativa)", desc:"Bom desempenho.", tips:["Sobe a dificuldade", "Treina lógica + probabilidade", "Aprende estratégias de teste"]};
+    if(score <= 16) return {iq: 120, label:"Alto (estimativa)", desc:"Excelente desempenho.", tips:["Puzzles mais difíceis", "Problemas de lógica cronometrados", "Aprende a evitar erros de distração"]};
+    if(score <= 18) return {iq: 130, label:"Muito alto (estimativa)", desc:"Desempenho muito forte.", tips:["Mantém treino", "Faz quizzes avançados", "Trabalha velocidade + precisão"]};
+    return {iq: 140, label:"Excecional (estimativa)", desc:"Quase perfeito.", tips:["Desafios avançados", "Treina com tempo menor", "Explora competições/puzzles"]};
+  }
+
+  function renderResult(score){
+    const r = estimateIQ(score);
+    pillEl.textContent = `Pontuação: ${score}/20 • ${r.label}`;
+    iqEl.textContent = `QI ~ ${r.iq}`;
+    descEl.textContent = r.desc;
+
+    tipsEl.innerHTML = "";
+    r.tips.forEach(t=>{
+      const li = document.createElement("li");
+      li.textContent = t;
+      tipsEl.appendChild(li);
+    });
+
+    resultCard.style.display = "block";
+  }
+
+  (async () => {
+    if(!session_id || !token){
+      statusEl.textContent = "Faltam dados para validar. Volta ao teste e tenta novamente.";
+      return;
+    }
+
+    const r = await fetch(`/verify?session_id=${encodeURIComponent(session_id)}&token=${encodeURIComponent(token)}`);
+    const data = await r.json();
+
+    if(data.ok){
+      statusEl.textContent = "Pagamento confirmado ✅ Resultado desbloqueado.";
+      renderResult(Number(data.score ?? 0));
+    } else {
+      statusEl.textContent = "Não foi possível confirmar o pagamento.";
+    }
+  })();
+</script>
+</body>
+</html>
