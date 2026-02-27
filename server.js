@@ -31,13 +31,17 @@ app.post('/create-checkout-session', async (req, res) => {
     if (!process.env.PRICE_EUR_1) return res.status(500).json({ error: 'Config em falta: PRICE_EUR_1' });
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: [{ price: process.env.PRICE_EUR_1, quantity: 1 }],
-      success_url: `${BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
-      cancel_url: `${BASE_URL}/cancel.html`,
-      metadata: {
-        quizToken,
-        score: String(score),
+  mode: 'payment',
+  line_items: [
+    { price: process.env.PRICE_ID, quantity: 1 }
+  ],
+  automatic_payment_methods: { enabled: true },
+  success_url: `${BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
+  cancel_url: `${BASE_URL}/cancel.html`,
+  metadata: {
+    quizToken,
+    score: String(score)
+  
       },
     });
 
