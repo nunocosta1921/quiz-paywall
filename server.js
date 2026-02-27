@@ -3,7 +3,20 @@ import express from 'express';
 import Stripe from 'stripe';
 
 const app = express();
+
+// Stripe key (LIVE ou TESTE) vem do Render/.env
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn("⚠️ Falta STRIPE_SECRET_KEY nas variáveis de ambiente.");
+}
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// BASE_URL deve ser tipo: https://quiz-paywall.onrender.com
+const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4242}`;
+
+// PRICE_EUR_1 deve ser o price_... (LIVE ou TESTE)
+if (!process.env.PRICE_EUR_1) {
+  console.warn("⚠️ Falta PRICE_EUR_1 nas variáveis de ambiente (price_...).");
+}
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -15,21 +28,22 @@ app.post('/create-checkout-session', async (req, res) => {
 
     if (!quizToken) return res.status(400).json({ error: 'Falta quizToken' });
     if (typeof score !== 'number') return res.status(400).json({ error: 'Falta score' });
+    if (!process.env.PRICE_EUR_1) return res.status(500).json({ error: 'Config em falta: PRICE_EUR_1' });
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price: process.env.PRICE_EUR_1, quantity: 1 }],
-      success_url: `${process.env.BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
-      cancel_url: `${process.env.BASE_URL}/cancel.html`,
+      success_url: `${BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
+      cancel_url: `${BASE_URL}/cancel.html`,
       metadata: {
         quizToken,
-        score: String(score) // guardamos como texto
-      }
+        score: String(score),
+      },
     });
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error(error);
+    console.error("Erro create-checkout-session:", error);
     res.status(500).json({ error: 'Erro ao criar sessão Stripe' });
   }
 });
@@ -47,13 +61,17 @@ app.get('/verify', async (req, res) => {
 
     res.json({
       ok: Boolean(pagamentoConfirmado && tokenCorreto),
-      score: session.metadata?.score ? Number(session.metadata.score) : null
+      score: session.metadata?.score ? Number(session.metadata.score) : null,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erro verify:", error);
     res.status(500).json({ ok: false });
   }
 });
 
-const PORT = 4242;
-app.listen(PORT, () => console.log(`Servidor a correr em http://localhost:${PORT}`));
+// Render dá PORT automaticamente
+const PORT = process.env.PORT || 4242;
+app.listen(PORT, () => {
+  console.log(`✅ Servidor ativo na porta ${PORT}`);
+  console.log(`🌐 BASE_URL: ${BASE_URL}`);
+});
