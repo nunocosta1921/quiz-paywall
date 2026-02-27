@@ -4,22 +4,19 @@ import Stripe from 'stripe';
 
 const app = express();
 
-// Stripe key (LIVE ou TESTE) vem do Render/.env
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn("⚠️ Falta STRIPE_SECRET_KEY nas variáveis de ambiente.");
-}
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// BASE_URL deve ser tipo: https://quiz-paywall.onrender.com
-const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4242}`;
-
-// PRICE_EUR_1 deve ser o price_... (LIVE ou TESTE)
-if (!process.env.PRICE_EUR_1) {
-  console.warn("⚠️ Falta PRICE_EUR_1 nas variáveis de ambiente (price_...).");
-}
-
 app.use(express.static('public'));
 app.use(express.json());
+
+// Variáveis obrigatórias
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+const PRICE_EUR_1 = process.env.PRICE_EUR_1;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${process.env.PORT || 4242}`;
+
+if (!STRIPE_SECRET_KEY) console.warn("⚠️ Falta STRIPE_SECRET_KEY (tem de ser sk_live_... ou sk_test_...)");
+if (!PRICE_EUR_1) console.warn("⚠️ Falta PRICE_EUR_1 (tem de ser price_...)");
+if (!BASE_URL) console.warn("⚠️ Falta BASE_URL");
+
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 // Criar sessão de pagamento Stripe
 app.post('/create-checkout-session', async (req, res) => {
@@ -28,24 +25,25 @@ app.post('/create-checkout-session', async (req, res) => {
 
     if (!quizToken) return res.status(400).json({ error: 'Falta quizToken' });
     if (typeof score !== 'number') return res.status(400).json({ error: 'Falta score' });
-    if (!process.env.PRICE_EUR_1) return res.status(500).json({ error: 'Config em falta: PRICE_EUR_1' });
+    if (!PRICE_EUR_1) return res.status(500).json({ error: 'Config em falta: PRICE_EUR_1' });
+    if (!STRIPE_SECRET_KEY) return res.status(500).json({ error: 'Config em falta: STRIPE_SECRET_KEY' });
 
     const session = await stripe.checkout.sessions.create({
-  mode: 'payment',
-  payment_method_types: ['card', 'mbway'], // + 'multibanco' se quiseres
-  line_items: [{ price: process.env.PRICE_EUR_1, quantity: 1 }],
-  success_url: `${BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
-  cancel_url: `${BASE_URL}/cancel.html`,
-  metadata: {
-    quizToken,
-    score: String(score),
-  },
+      mode: 'payment',
+      payment_method_types: ['card', 'mbway'], // + 'multibanco' se quiseres
+      line_items: [{ price: PRICE_EUR_1, quantity: 1 }],
+      success_url: `${BASE_URL}/success.html?session_id={CHECKOUT_SESSION_ID}&token=${encodeURIComponent(quizToken)}`,
+      cancel_url: `${BASE_URL}/cancel.html`,
+      metadata: {
+        quizToken,
+        score: String(score),
+      },
     });
 
     res.json({ url: session.url });
   } catch (error) {
     console.error("Erro create-checkout-session:", error);
-    res.status(500).json({ error: 'Erro ao criar sessão Stripe' });
+    res.status(500).json({ error: error?.message || 'Erro ao criar sessão Stripe' });
   }
 });
 
@@ -66,11 +64,10 @@ app.get('/verify', async (req, res) => {
     });
   } catch (error) {
     console.error("Erro verify:", error);
-    res.status(500).json({ ok: false });
+    res.status(500).json({ ok: false, error: error?.message || "Erro verify" });
   }
 });
 
-// Render dá PORT automaticamente
 const PORT = process.env.PORT || 4242;
 app.listen(PORT, () => {
   console.log(`✅ Servidor ativo na porta ${PORT}`);
