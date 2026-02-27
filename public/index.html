@@ -159,7 +159,7 @@
 
         <div class="pillRow" style="margin-top:10px">
           <div class="pill" id="pillProgress">Pergunta <strong>1</strong>/30</div>
-          
+          <div class="pill" id="pillScore">Pontuação <strong>0</strong></div>
         </div>
 
         <div class="bar"><div class="fill" id="fill"></div></div>
@@ -201,82 +201,43 @@
   </div>
 
 <script>
- const quiz = [
-  // Lógica / padrões (misturado)
-  { q:"1) Qual é o próximo na sequência: A, C, E, G, ?", o:["H","I","J","K"], c:1 }, // I
-  { q:"2) Qual palavra NÃO pertence ao grupo?", o:["Martelo","Serrote","Chave de fendas","Parafuso"], c:3 }, // Parafuso
-  { q:"3) Se hoje é terça-feira, daqui a 100 dias será:", o:["Quarta","Quinta","Sexta","Sábado"], c:0 }, // Quarta (100 mod 7 = 2)
-  { q:"4) Qual destes é um anagrama de “PEDRA”?", o:["PARE D","PADRE","PEDAR","Todas"], c:1 }, // PADRE
-  { q:"5) Escolhe a frase logicamente equivalente a: “Se chove, levo guarda-chuva.”", o:[
-      "Levo guarda-chuva apenas se chover",
-      "Se não levo guarda-chuva, então não chove",
-      "Se levo guarda-chuva, então chove",
-      "Chove e levo guarda-chuva sempre"
-    ], c:1 },
+  const quiz = [
+    {q:"1) 2,4,8,16, ?",o:["18","24","32","34"],c:2},
+    {q:"2) 5,10,20,40, ?",o:["60","70","80","90"],c:2},
+    {q:"3) 1,1,2,3,5,8, ?",o:["11","12","13","15"],c:2},
+    {q:"4) 9,7,5,3, ?",o:["2","1","0","-1"],c:1},
+    {q:"5) 3,6,12,24, ?",o:["30","36","48","60"],c:2},
+    {q:"6) 15% de 200?",o:["15","20","30","40"],c:2},
+    {q:"7) 12x = 60 → x =",o:["3","4","5","6"],c:2},
+    {q:"8) 25% de 80?",o:["10","15","20","25"],c:2},
+    {q:"9) Média de 6,10,14?",o:["9","10","11","12"],c:1},
+    {q:"10) 3x + 5 = 20",o:["3","4","5","6"],c:1},
 
-  // Atenção / detalhe
-  { q:"6) Qual palavra está escrita corretamente?", o:["Exceção","Exeção","Exessão","Exceçâo"], c:0 },
-  { q:"7) Qual é a média de 12, 18 e 30?", o:["18","20","22","24"], c:1 }, // 60/3=20
-  { q:"8) Uma loja faz 25% de desconto num artigo de 80€. Preço final:", o:["55€","60€","65€","70€"], c:2 }, // 60? wait 25% of 80=20, final 60. correct index should be 1. Let's fix options.
-  
-  { q:"9) Se 3 pessoas fazem uma tarefa em 12 horas, 6 pessoas fazem em:", o:["3 horas","4 horas","6 horas","8 horas"], c:1 }, // 6h? Actually inversely: work=36 person-hours. 6 people =>6 hours. Correct option "6 horas" index 2. Fix.
- 
-  { q:"10) Qual destas frases é uma conclusão válida? “Todos os gatos são animais. Alguns animais são pretos.”", o:[
-      "Alguns gatos são pretos",
-      "Nenhum gato é preto",
-      "Pode haver gatos pretos",
-      "Todos os animais são gatos"
-    ], c:2 },
+    {q:"11) Palavra diferente:",o:["Maçã","Banana","Cenoura","Pera"],c:2},
+    {q:"12) Anagrama de ROMA:",o:["AMOR","MORA","RAMO","Todas"],c:3},
+    {q:"13) Triângulo tem 3 lados. Hexágono?",o:["5","6","7","8"],c:1},
+    {q:"14) Se todos A são B e alguns B são C:",o:["Alguns C são A","Todos C são A","Nenhum C é A","Não sabemos"],c:3},
+    {q:"15) Ordem alfabética correta:",o:["Casa,Cão","Cão,Casa","Casa,Catar","Catar,Casa"],c:2},
 
-  // Verbal / analogias
-  { q:"11) Analogia: Médico está para Hospital assim como Professor está para:", o:["Escola","Livro","Aluno","Caneta"], c:0 },
-  { q:"12) Qual é o sinónimo mais próximo de “inevitável”?", o:["Provável","Certo","Impossível","Rápido"], c:1 },
-  { q:"13) Qual palavra completa melhor: “Ela é tão ___ que termina tudo antes do prazo.”", o:["preguiçosa","pontual","disciplinada","barulhenta"], c:2 },
-  { q:"14) Qual destas opções é a MAIS correta? 1/2 de 1/2 é:", o:["1/2","1/3","1/4","1/5"], c:2 },
-  { q:"15) Se A=1, B=2, C=3… então a palavra “CAB” soma:", o:["6","5","4","3"], c:1 }, // 3+1+2=6 -> index 0. Fix.
- 
+    {q:"16) 0,9 vs 0,99 qual maior?",o:["0,9","0,90","0,909","0,99"],c:3},
+    {q:"17) 4 pessoas fazem trabalho em 12 dias. 6 fazem em:",o:["6","8","10","12"],c:1},
+    {q:"18) 12€ com 20% desconto. Original?",o:["14","15","16","18"],c:1},
+    {q:"19) 7² =",o:["42","47","49","52"],c:2},
+    {q:"20) 144 ÷ 12 =",o:["10","11","12","13"],c:2},
 
-  // Probabilidade / raciocínio
-  { q:"16) Lanças uma moeda 2 vezes. Probabilidade de sair 2 caras:", o:["1/2","1/3","1/4","1/6"], c:2 },
-  { q:"17) Num saco há 5 bolas vermelhas e 5 azuis. Ao tirar 1 bola, a probabilidade de ser azul é:", o:["1/2","1/5","2/5","3/5"], c:0 },
-  { q:"18) Um relógio adianta 2 minutos por hora. Em 5 horas adianta:", o:["5 min","8 min","10 min","12 min"], c:2 },
-  { q:"19) Se duplicares um número e somares 6 dá 20. O número é:", o:["5","6","7","8"], c:1 }, // 2x+6=20 =>7? wait x=7. Correct index 2.
- 
-  { q:"20) Qual número é maior?", o:["0,9","0,90","0,909","0,99"], c:3 },
+    {q:"21) Próximo: 1,4,9,16, ?",o:["20","24","25","30"],c:2},
+    {q:"22) 2³ =",o:["6","8","10","12"],c:1},
+    {q:"23) 100 ÷ 4 =",o:["20","22","24","25"],c:3},
+    {q:"24) Número primo:",o:["9","15","17","21"],c:2},
+    {q:"25) 8 x 7 =",o:["54","56","58","60"],c:1},
 
-  // Padrões / lógica "real"
-  { q:"21) Se todos os Zogs são Blips e nenhum Blip é Nap, então:", o:[
-      "Alguns Naps são Zogs",
-      "Nenhum Zog é Nap",
-      "Todos os Naps são Zogs",
-      "Alguns Blips são Naps"
-    ], c:1 },
-  { q:"22) Qual vem a seguir? Segunda, Quarta, Sexta, ?", o:["Sábado","Domingo","Terça","Quinta"], c:0 }, // dias alternados
-  { q:"23) Qual é a próxima palavra na ordem alfabética?", o:["Cão","Casa","Catar","Cedo"], c:1 }, // Casa (C-a-s...)
-  { q:"24) Se 20% de X é 50, então X é:", o:["200","250","300","350"], c:1 }, // 50/0.2=250
-  { q:"25) Um livro custa 12€ após 20% de desconto. Preço original:", o:["14€","15€","16€","18€"], c:1 },
+    {q:"26) 5! =",o:["20","60","120","240"],c:2},
+    {q:"27) Ângulo reto tem:",o:["45°","60°","90°","180°"],c:2},
+    {q:"28) 11 x 11 =",o:["111","121","131","141"],c:1},
+    {q:"29) 1/2 de 1/2 =",o:["1/2","1/3","1/4","1/5"],c:2},
+    {q:"30) 1000 - 333 =",o:["667","677","687","697"],c:0},
+  ];
 
-  // Atenção / interpretação
-  { q:"26) Qual frase tem o MESMO significado de “Ela só sai se terminar o trabalho”?", o:[
-      "Se ela sai, então terminou o trabalho",
-      "Se ela terminou o trabalho, então sai",
-      "Ela sai e termina o trabalho",
-      "Ela nunca sai"
-    ], c:0 },
-  
-  { q:"27) Se “VERDE” é escrito como “EDREV” (ao contrário), então “PORTA” fica:", o:["ATROP","ATPOR","APRTO","AROTP"], c:0 },
-
-  // Mistura final (não só números)
-  { q:"28) Qual destes é um provérbio/expressão com sentido parecido de “não vale a pena insistir”?", o:[
-      "Água mole em pedra dura…",
-      "Mais vale tarde do que nunca",
-      "Não adianta chorar sobre o leite derramado",
-      "Quem espera sempre alcança"
-    ], c:2 },
-  { q:"29) Se um autocarro chega a cada 12 minutos, em 1 hora chegam aproximadamente:", o:["4","5","6","7"], c:2 }, // 60/12=5 -> index 1. Fix.
-  
-  { q:"30) Qual opção completa melhor: “Ele falou tão baixo que ninguém conseguiu ___.”", o:["ouvir","ver","mexer","cair"], c:0 },
-];
   let i = 0;
   let score = 0;
 
@@ -288,11 +249,13 @@
   const ansEl = document.getElementById("answers");
 
   const pillProgress = document.getElementById("pillProgress");
+  const pillScore = document.getElementById("pillScore");
   const fill = document.getElementById("fill");
   const payBtn = document.getElementById("payBtn");
 
   function updateUI(){
     pillProgress.innerHTML = `Pergunta <strong>${Math.min(i+1, quiz.length)}</strong>/${quiz.length}`;
+    pillScore.innerHTML = `Pontuação <strong>${score}</strong>`;
     fill.style.width = `${(i/quiz.length)*100}%`;
   }
 
